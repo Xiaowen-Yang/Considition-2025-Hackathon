@@ -2,9 +2,8 @@
 
 This repository contains a Python bot designed to compete in the Considition 2025 hackathon. The bot's goal is to provide charging recommendations to a fleet of electric vehicles (EVs) to maximize a final score.
 
-The bot implements a **"Mandatory-First"** strategy, which is designed to fulfill a critical game rule: **a customer must charge at least once** to be eligible for any completion points[cite: 115, 174].
+The bot implements a "Mandatory-First" strategy, which is designed to fulfill a critical game rule: a customer must charge at least once to be eligible for any completion points.
 
----
 
 ## Algorithm Logic
 
@@ -15,23 +14,23 @@ The bot's logic is divided into two main phases: a one-time pre-computation and 
 Before the simulation starts, the bot performs two crucial setup steps:
 
 1. **Build Graph & Index Stations:** It parses the map data to build a graph representation of all nodes (locations) and edges (roads). During this process, it identifies and indexes all charging stations into a global `station_index` for quick lookup.
-2. **Compute All-Pairs Shortest Paths:** The bot uses the **Floyd-Warshall algorithm** to pre-compute the shortest path (and its distance) between *every single pair* of nodes on the map. These results are stored in a global `path_cache`.
+2. **Compute All-Pairs Shortest Paths:** The bot uses the Floyd-Warshall algorithm to pre-compute the shortest path (and its distance) between *every single pair* of nodes on the map. These results are stored in a global `path_cache`.
 
 This heavy pre-computation allows the bot to make complex routing decisions in real-time (per-tick) without needing to run slow pathfinding algorithms repeatedly.
 
-### 2. The "Mandatory-First" Strategy
+### 2. The Mandatory-First Strategy
 
 The bot's core strategy is simple and robust: ensure every customer receives *exactly one* charging recommendation.
 
 * A global set, `customer_has_been_routed_set`, tracks which customers have already been given a charging destination.
 * On each tick, the bot iterates through all active customers.
-* If a customer is already in the `customer_has_been_routed_set`, the bot **ignores them**.
+* If a customer is already in the `customer_has_been_routed_set`, the bot ignores them.
 * If a customer is new, the bot calls `find_best_mandatory_station` to find their optimal charging location.
 * Once the best station is found, the bot issues a recommendation for that customer to charge there and immediately adds the customer's ID to the `customer_has_been_routed_set`.
 
 This ensures every customer attempts to fulfill the "must charge once" rule without being re-routed or given conflicting instructions later in their journey.
 
-### 3. Finding the "Best" Station (The Brain)
+### 3. Finding the Best Station
 
 The `find_best_mandatory_station` function is the "brain" of the bot. It determines the single best station for a customer by iterating through **all** available stations on the map and calculating a `total_cost` for each.
 
@@ -42,8 +41,6 @@ The `total_cost` is a weighted sum of three factors, with weights determined by 
 3.  **Energy Cost:** A score representing how "green" the station's energy is. The `calculate_green_score` function analyzes the station's zone's energy sources (e.g., Solar, Wind, Coal) and the time of day to reward charging at more sustainable locations.
 
 The station with the **lowest `total_cost`** is selected as the best mandatory station for that customer.
-
----
 
 ## How to Use
 
@@ -73,7 +70,7 @@ Running locally allows you to test your algorithm without using API quota.
     Open `app.py` and set the global constants for local testing:
     ```python
     # API Configuration
-    API_KEY = ""  # Not needed for local
+    API_KEY = ""
     BASE_URL = "http://localhost:8080" #
 
     # Map Configuration
@@ -90,7 +87,7 @@ When you are ready to submit to the official leaderboard:
     ```python
     # API Configuration
     API_KEY = "YOUR_PERSONAL_API_KEY_HERE" # 
-    [cite_start]BASE_URL = "[https://api.considition.com](https://api.considition.com)" # 
+    BASE_URL = "https://api.considition.com" # 
 
     # Map Configuration
     MAP_NAME = "" # Or the current official map
@@ -103,6 +100,8 @@ With your configuration set, simply run the `app.py` script:
 
 ```sh
 python3 app.py
+```
 
-### 5. Performance
-37230p on the cloud API
+## Performance
+
+37230p on the cloud
